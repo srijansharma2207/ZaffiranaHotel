@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotel.controller.UserPortalController">
+
+    <top>
+        <HBox styleClass="panel-header" spacing="12" alignment="CENTER_LEFT">
+            <padding><Insets top="16" bottom="16" left="20" right="20"/></padding>
+            <Label text="User Portal" styleClass="panel-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userInfoLabel" text="Not logged in" styleClass="info-label"/>
+            <Button text="↻ Refresh" styleClass="btn-secondary" onAction="#refresh"/>
+            <Button text="✓ Book" styleClass="btn-primary" onAction="#bookNow"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="14" styleClass="bill-panel">
+            <padding><Insets top="20" bottom="20" left="30" right="30"/></padding>
+
+            <Label text="New Booking" styleClass="panel-title"/>
+            <Separator/>
+
+            <GridPane hgap="18" vgap="12">
+                <Label text="Check-In:" GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="bill-label"/>
+                <DatePicker fx:id="dpCheckIn" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                <Label text="Check-Out:" GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="bill-label"/>
+                <DatePicker fx:id="dpCheckOut" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                <Label text="Guests:" GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="bill-label"/>
+                <Spinner fx:id="spGuests" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="160"/>
+
+                <Label text="Breakfast:" GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="bill-label"/>
+                <CheckBox fx:id="cbBreakfast" text="Include breakfast" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                <Label text="Room Type:" GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="bill-label"/>
+                <ComboBox fx:id="cbRoomType" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="220"/>
+            </GridPane>
+
+            <Label fx:id="availabilityLabel" text="" styleClass="info-label"/>
+            <Label fx:id="finalPriceLabel" text="" styleClass="info-label"/>
+        </VBox>
+    </center>
+
+</BorderPane>
+

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.shape.*?>
+
+<StackPane xmlns:fx="http://javafx.com/fxml"
+           fx:controller="com.hotel.controller.MainController"
+           stylesheets="@styles.css"
+           prefWidth="1100" prefHeight="720">
+
+    <BorderPane fx:id="rootPane">
+
+        <top>
+            <HBox styleClass="header" alignment="CENTER_LEFT" spacing="14">
+                <padding><Insets top="14" bottom="14" left="22" right="22"/></padding>
+                <Button fx:id="hamburgerBtn" text="☰" styleClass="hamburger-btn" onAction="#toggleDrawer" visible="false" managed="false"/>
+                <Label text="🏨" styleClass="hotel-icon"/>
+                <VBox spacing="1">
+                    <Label text="Zaffirana Resorts" styleClass="hotel-title"/>
+                    <Label text="by Srijan Sharma" styleClass="hotel-byline"/>
+                </VBox>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="navArrowBtn" text="&#x2190;" styleClass="btn-nav-arrow" onAction="#navArrowAction"/>
+                <Button fx:id="logoutBtn" text="Logout" styleClass="btn-login-header" visible="false" managed="false" onAction="#logout"/>
+            </HBox>
+        </top>
+
+        <center>
+            <StackPane>
+
+                <!-- ══════════════════════════════════════════════
+                     PRE-LOGIN LANDING PAGE
+                ══════════════════════════════════════════════ -->
+                <ScrollPane fx:id="preLoginPane" fitToWidth="true" styleClass="home-scroll" visible="true" managed="true">
+                    <content>
+                        <VBox styleClass="landing-root" spacing="0">
+
+                            <!-- HERO SECTION -->
+                            <HBox styleClass="landing-hero" spacing="0">
+                                <VBox spacing="18" HBox.hgrow="ALWAYS">
+                                    <padding><Insets top="60" bottom="60" left="60" right="40"/></padding>
+                                    <Label text="JODHPUR · RAJASTHAN · INDIA" styleClass="landing-hero-tag"/>
+                                    <Label text="Where the Desert&#10;Meets Luxury" styleClass="landing-hero-title"/>
+                                    <Region prefHeight="2" maxHeight="2" styleClass="landing-divider"/>
+                                    <Label text="Spread across 2 acres of pristine Jodhpur landscape, Zaffirana Resorts&#10;blends Rajput heritage with contemporary elegance. A sanctuary where&#10;ancient sandstone walls whisper stories of a golden era." styleClass="landing-hero-subtitle"/>
+                                    <HBox spacing="14">
+                                        <padding><Insets top="10"/></padding>
+                                        <Button fx:id="bookAStayBtn" text="Book a Stay" styleClass="landing-cta-primary" onAction="#bookAStay"/>
+                                        <Button fx:id="exploreResortBtn" text="Explore the Resort" styleClass="landing-cta-secondary" onAction="#exploreResort"/>
+                                    </HBox>
+                                    <!-- Stats row -->
+                                    <HBox spacing="40">
+                                        <padding><Insets top="24"/></padding>
+                                        <VBox spacing="4">
+                                            <Label text="2" styleClass="landing-stat-number"/>
+                                            <Label text="ACRES OF GROUNDS" styleClass="landing-stat-label"/>
+                                        </VBox>
+                                        <VBox spacing="4">
+                                            <Label text="8" styleClass="landing-stat-number"/>
+                                            <Label text="LUXURY SUITES" styleClass="landing-stat-label"/>
+                                        </VBox>
+                                        <VBox spacing="4">
+                                            <Label text="3" styleClass="landing-stat-number"/>
+                                            <Label text="DINING EXPERIENCES" styleClass="landing-stat-label"/>
+                                        </VBox>
+                                        <VBox spacing="4">
+                                            <Label text="5★" styleClass="landing-stat-number"/>
+                                            <Label text="RATED EXPERIENCE" styleClass="landing-stat-label"/>
+                                        </VBox>
+                                    </HBox>
+                                </VBox>
+
+                                <!-- Login card on hero -->
+                                <VBox spacing="16" styleClass="landing-login-card" minWidth="280" maxWidth="300" alignment="CENTER">
+                                    <padding><Insets top="60" bottom="0" left="0" right="50"/></padding>
+                                    <VBox spacing="6">
+                                        <Label text="Welcome Back" styleClass="landing-login-title"/>
+                                        <Label text="Sign in to manage your resort" styleClass="landing-login-sub"/>
+                                    </VBox>
+                                    <Separator/>
+                                    <Button text="🔐  Admin Login" styleClass="landing-admin-btn" maxWidth="Infinity" onAction="#openLoginChooser"/>
+                                    <Button text="👤  Guest Login" styleClass="landing-user-btn" maxWidth="Infinity" onAction="#openLoginChooser"/>
+                                    <Label fx:id="connectedBadge" text="● DB Connected" styleClass="landing-connected-badge" alignment="CENTER" maxWidth="Infinity"/>
+                                </VBox>
+                            </HBox>
+
+                            <!-- FEATURE STRIP -->
+                            <HBox styleClass="landing-feature-strip" alignment="CENTER" spacing="60">
+                                <padding><Insets top="14" bottom="14" left="40" right="40"/></padding>
+                                <Label text="✦  HERITAGE ARCHITECTURE" styleClass="landing-feature-text"/>
+                                <Label text="✦  INFINITY POOL" styleClass="landing-feature-text"/>
+                                <Label text="✦  SPA &amp; WELLNESS" styleClass="landing-feature-text"/>
+                                <Label text="✦  ROYAL BANQUET HALL" styleClass="landing-feature-text"/>
+                                <Label text="✦  DESERT SAFARI" styleClass="landing-feature-text"/>
+                                <Label text="✦  ROOFTOP DINING" styleClass="landing-feature-text"/>
+                            </HBox>
+
+                            <!-- ABOUT SECTION -->
+                            <HBox spacing="50" alignment="CENTER">
+                                <padding><Insets top="56" bottom="56" left="60" right="60"/></padding>
+
+                                <VBox spacing="18" HBox.hgrow="ALWAYS" maxWidth="480">
+                                    <Label text="THE ZAFFIRANA STORY" styleClass="landing-section-tag"/>
+                                    <Label text="A Palace Born from&#10;Jodhpur's Golden Sands" styleClass="landing-section-title"/>
+                                    <Region prefHeight="3" maxHeight="3" styleClass="landing-divider" maxWidth="50"/>
+                                    <Label text="Nestled in the shadow of the majestic Mehrangarh Fort, Zaffirana Resorts was conceived as a tribute to Rajasthan's royal legacy. Our 2-acre estate was once a private nobleman's retreat — today transformed into a world-class destination that preserves its soul." styleClass="landing-section-body"/>
+                                    <Label text="Every arch, every jaali screen, every hand-painted fresco has been restored or recreated by master artisans from Jodhpur's famed craftsmen communities. The result is a living museum where you sleep, dine, and breathe history." styleClass="landing-section-body"/>
+                                    <!-- Amenity pills -->
+                                    <FlowPane hgap="10" vgap="10">
+                                        <padding><Insets top="8"/></padding>
+                                        <Label text="🌊  Infinity Pool" styleClass="amenity-pill"/>
+                                        <Label text="🧖  Ayurvedic Spa" styleClass="amenity-pill"/>
+                                        <Label text="🍽  Rooftop Restaurant" styleClass="amenity-pill"/>
+                                        <Label text="🐫  Desert Safari" styleClass="amenity-pill"/>
+                                        <Label text="🎭  Cultural Evenings" styleClass="amenity-pill"/>
+                                        <Label text="🏊  Heated Pool" styleClass="amenity-pill"/>
+                                        <Label text="🎾  Tennis Court" styleClass="amenity-pill"/>
+                                        <Label text="📚  Library Lounge" styleClass="amenity-pill"/>
+                                    </FlowPane>
+                                </VBox>
+
+                                <!-- Feature cards column -->
+                                <VBox spacing="16" HBox.hgrow="ALWAYS" maxWidth="440">
+                                    <VBox styleClass="landing-card" spacing="10">
+                                        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                                        <Label text="🏰" styleClass="landing-card-icon"/>
+                                        <Label text="Heritage Havelis" styleClass="landing-card-title"/>
+                                        <Label text="Stay in meticulously restored 18th-century havelis with original sandstone courtyards, hand-painted ceilings and private verandas overlooking the Blue City." styleClass="landing-card-body"/>
+                                    </VBox>
+                                    <VBox styleClass="landing-card" spacing="10">
+                                        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                                        <Label text="🍛" styleClass="landing-card-icon"/>
+                                        <Label text="Royal Rajasthani Cuisine" styleClass="landing-card-title"/>
+                                        <Label text="From dal baati churma to laal maas, our three dining venues serve authentic recipes passed down through generations of royal khansamas (chefs)." styleClass="landing-card-body"/>
+                                    </VBox>
+                                    <VBox styleClass="landing-card" spacing="10">
+                                        <padding><Insets top="20" bottom="20" left="20" right="20"/></padding>
+                                        <Label text="🌅" styleClass="landing-card-icon"/>
+                                        <Label text="Sunset Desert Experiences" styleClass="landing-card-title"/>
+                                        <Label text="Watch the sun melt behind the Thar Desert dunes on our curated camel safari, followed by a private dinner under a canopy of Rajasthan stars." styleClass="landing-card-body"/>
+                                    </VBox>
+                                </VBox>
+                            </HBox>
+
+                            <!-- QUOTE BLOCK -->
+                            <HBox>
+                                <padding><Insets top="0" bottom="56" left="60" right="60"/></padding>
+                                <VBox styleClass="landing-quote" spacing="14" HBox.hgrow="ALWAYS">
+                                    <Label text="&quot; Jodhpur is not just a city, it is a canvas painted in blue, gold and ochre.&#10;At Zaffirana, we invite you to live inside that painting. &quot;" styleClass="landing-quote-text"/>
+                                    <Label text="— Srijan Sharma, Founder · Zaffirana Resorts" styleClass="landing-quote-author"/>
+                                </VBox>
+                            </HBox>
+
+                            <!-- FOOTER -->
+                            <HBox styleClass="landing-hero" alignment="CENTER" spacing="40">
+                                <padding><Insets top="24" bottom="24" left="60" right="60"/></padding>
+                                <Label text="🏨  Zaffirana Resorts" styleClass="hotel-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label text="Mewar Estate, Jodhpur 342001, Rajasthan, India" styleClass="landing-hero-subtitle"/>
+                                <Label text="  ·  " styleClass="landing-hero-subtitle"/>
+                                <Label text="+91 0291-000-0000" styleClass="landing-hero-subtitle"/>
+                            </HBox>
+
+                        </VBox>
+                    </content>
+                </ScrollPane>
+
+                <!-- ══════════════════════════════════════════════
+                     POST-LOGIN TAB PANE
+                ══════════════════════════════════════════════ -->
+                <TabPane fx:id="mainTabPane" styleClass="main-tabs" tabClosingPolicy="UNAVAILABLE" visible="false" managed="false">
+                    <Tab text="🏠  Home" fx:id="homeTab">
+                        <fx:include source="home.fxml" fx:id="home"/>
+                    </Tab>
+                    <Tab text="👤  User Portal" fx:id="userTab">
+                        <fx:include source="user.fxml" fx:id="user"/>
+                    </Tab>
+                    <Tab text="🛏  Rooms" fx:id="roomsTab">
+                        <fx:include source="rooms.fxml" fx:id="rooms"/>
+                    </Tab>
+                    <Tab text="📋  Bookings" fx:id="bookingsTab">
+                        <fx:include source="booking.fxml" fx:id="booking"/>
+                    </Tab>
+                    <Tab text="💰  Billing" fx:id="billingTab">
+                        <fx:include source="billing.fxml" fx:id="billing"/>
+                    </Tab>
+                    <Tab text="👥  Users" fx:id="usersTab">
+                        <fx:include source="users.fxml" fx:id="users"/>
+                    </Tab>
+                </TabPane>
+
+            </StackPane>
+        </center>
+
+        <bottom>
+            <HBox styleClass="status-bar" alignment="CENTER_LEFT" spacing="10">
+                <padding><Insets top="8" bottom="8" left="22" right="22"/></padding>
+                <Label fx:id="statusLabel" text="● Connected to Oracle DB | XEPDB1@localhost:1521" styleClass="status-ok"/>
+            </HBox>
+        </bottom>
+
+    </BorderPane>
+
+    <!-- DRAWER OVERLAY -->
+    <Pane fx:id="drawerOverlay" styleClass="drawer-overlay" visible="false" managed="false" onMouseClicked="#hideDrawer"/>
+
+    <VBox fx:id="drawerPane" styleClass="drawer" StackPane.alignment="CENTER_LEFT" prefWidth="270" visible="false" managed="false">
+        <padding><Insets top="20" bottom="20" left="18" right="18"/></padding>
+        <Label text="Zaffirana" styleClass="drawer-title"/>
+        <Label text="Quick Navigation" styleClass="drawer-subtitle"/>
+        <padding><Insets top="8"/></padding>
+        <Separator/>
+        <padding><Insets top="8"/></padding>
+        <Button fx:id="drawerHomeBtn" text="🏠  Home" styleClass="drawer-item" maxWidth="Infinity" onAction="#goHome"/>
+        <Button fx:id="drawerUserPortalBtn" text="👤  User Portal" styleClass="drawer-item" maxWidth="Infinity" onAction="#goUserPortal"/>
+        <Button fx:id="drawerRoomsBtn" text="🛏  Rooms" styleClass="drawer-item" maxWidth="Infinity" onAction="#goRooms"/>
+        <Button fx:id="drawerBookingsBtn" text="📋  Bookings" styleClass="drawer-item" maxWidth="Infinity" onAction="#goBookings"/>
+        <Button fx:id="drawerBillingBtn" text="💰  Billing" styleClass="drawer-item" maxWidth="Infinity" onAction="#goBilling"/>
+        <Button fx:id="drawerUsersBtn" text="👥  Users" styleClass="drawer-item" maxWidth="Infinity" onAction="#goUsers"/>
+        <Region VBox.vgrow="ALWAYS"/>
+        <Button text="✕  Close" styleClass="drawer-close" maxWidth="Infinity" onAction="#hideDrawer"/>
+    </VBox>
+
+</StackPane>

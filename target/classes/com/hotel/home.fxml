@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane xmlns:fx="http://javafx.com/fxml" fitToWidth="true" styleClass="home-scroll">
+    <content>
+        <VBox spacing="20" styleClass="home-root">
+            <padding><Insets top="28" bottom="28" left="28" right="28"/></padding>
+
+            <!-- ══ HERO BANNER ══ -->
+            <HBox styleClass="home-hero" spacing="30" alignment="CENTER_LEFT">
+                <VBox spacing="10" HBox.hgrow="ALWAYS">
+                    <Label text="Zaffirana Resorts" styleClass="home-hero-title"/>
+                    <Label text="Jodhpur · Rajasthan · India  ·  2 acres · 8 suites" styleClass="home-hero-subtitle"/>
+                    <HBox spacing="12">
+                        <padding><Insets top="8"/></padding>
+                        <Button fx:id="adminLoginBtn" text="🔐  Admin Panel" styleClass="home-cta-primary"/>
+                        <Button fx:id="userLoginBtn" text="👤  User Portal" styleClass="home-cta-secondary"/>
+                    </HBox>
+                    <Label text="Use ☰ to jump between modules" styleClass="home-hero-hint"/>
+                </VBox>
+                <VBox spacing="6" alignment="CENTER">
+                    <Label text="STATUS" styleClass="home-pill-title"/>
+                    <Label text="● Connected" styleClass="home-pill"/>
+                </VBox>
+            </HBox>
+
+            <!-- ══ QUICK STATS ══ -->
+            <HBox spacing="14">
+                <VBox styleClass="home-stat-accent" spacing="6" HBox.hgrow="ALWAYS">
+                    <padding><Insets top="18" bottom="18" left="18" right="18"/></padding>
+                    <Label text="SUITES" styleClass="home-stat-title-light"/>
+                    <Label text="8" styleClass="home-stat-value-light"/>
+                    <Label text="Total suites" styleClass="home-stat-sub-light"/>
+                </VBox>
+                <VBox styleClass="home-stat" spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="GROUNDS" styleClass="home-stat-title"/>
+                    <Label text="2 Acres" styleClass="home-stat-value"/>
+                    <Label text="Jodhpur estate" styleClass="home-stat-sub"/>
+                </VBox>
+                <VBox styleClass="home-stat" spacing="6" HBox.hgrow="ALWAYS">
+                    <Label text="DINING" styleClass="home-stat-title"/>
+                    <Label text="3" styleClass="home-stat-value"/>
+                    <Label text="Restaurant venues" styleClass="home-stat-sub"/>
+                </VBox>
+                <VBox styleClass="home-stat-accent" spacing="6" HBox.hgrow="ALWAYS">
+                    <padding><Insets top="18" bottom="18" left="18" right="18"/></padding>
+                    <Label text="RATING" styleClass="home-stat-title-light"/>
+                    <Label text="5 ★" styleClass="home-stat-value-light"/>
+                    <Label text="Guest satisfaction" styleClass="home-stat-sub-light"/>
+                </VBox>
+            </HBox>
+
+            <!-- ══ MODULE CARDS ══ -->
+            <GridPane hgap="14" vgap="14">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="33.33"/>
+                    <ColumnConstraints percentWidth="33.33"/>
+                    <ColumnConstraints percentWidth="33.33"/>
+                </columnConstraints>
+
+                <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="home-card" spacing="10">
+                    <Label text="🛏" styleClass="home-card-icon"/>
+                    <Label text="Rooms" styleClass="home-card-title"/>
+                    <Label text="Add new suites, view availability, and update room status across all 22 rooms." styleClass="home-card-body"/>
+                    <HBox alignment="CENTER_RIGHT">
+                        <padding><Insets top="8"/></padding>
+                        <Label text="→" styleClass="home-card-arrow"/>
+                    </HBox>
+                </VBox>
+
+                <VBox GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="home-card" spacing="10">
+                    <Label text="📋" styleClass="home-card-icon"/>
+                    <Label text="Bookings" styleClass="home-card-title"/>
+                    <Label text="Create reservations and manage guest check-ins and checkouts in one flow." styleClass="home-card-body"/>
+                    <HBox alignment="CENTER_RIGHT">
+                        <padding><Insets top="8"/></padding>
+                        <Label text="→" styleClass="home-card-arrow"/>
+                    </HBox>
+                </VBox>
+
+                <VBox GridPane.rowIndex="0" GridPane.columnIndex="2" styleClass="home-card" spacing="10">
+                    <Label text="💰" styleClass="home-card-icon"/>
+                    <Label text="Billing" styleClass="home-card-title"/>
+                    <Label text="Review billing history and generate totals based on guest stay duration." styleClass="home-card-body"/>
+                    <HBox alignment="CENTER_RIGHT">
+                        <padding><Insets top="8"/></padding>
+                        <Label text="→" styleClass="home-card-arrow"/>
+                    </HBox>
+                </VBox>
+            </GridPane>
+
+            <!-- ══ OVERVIEW + ABOUT SECTION ══ -->
+            <HBox spacing="14">
+                <!-- Left: Overview -->
+                <VBox spacing="14" styleClass="home-section" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Quick Overview" styleClass="home-section-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label text="Today's snapshot" styleClass="home-section-sub"/>
+                    </HBox>
+                    <Separator/>
+                    <HBox spacing="10">
+                        <VBox styleClass="home-stat" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="OPERATIONS" styleClass="home-stat-title"/>
+                            <Label text="All Systems" styleClass="home-stat-value"/>
+                            <Label text="Manage in seconds" styleClass="home-stat-sub"/>
+                        </VBox>
+                        <VBox styleClass="home-stat" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="NAVIGATION" styleClass="home-stat-title"/>
+                            <Label text="Drawer Menu" styleClass="home-stat-value"/>
+                            <Label text="Quick access" styleClass="home-stat-sub"/>
+                        </VBox>
+                    </HBox>
+                    <HBox spacing="10">
+                        <VBox styleClass="home-stat" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="DATABASE" styleClass="home-stat-title"/>
+                            <Label text="Oracle XE" styleClass="home-stat-value"/>
+                            <Label text="Connected · Live" styleClass="home-stat-sub"/>
+                        </VBox>
+                        <VBox styleClass="home-stat" spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="BRAND" styleClass="home-stat-title"/>
+                            <Label text="Zaffirana" styleClass="home-stat-value"/>
+                            <Label text="Jodhpur, Rajasthan" styleClass="home-stat-sub"/>
+                        </VBox>
+                    </HBox>
+                </VBox>
+
+                <!-- Right: About the Resort -->
+                <VBox spacing="12" styleClass="home-section" prefWidth="340" maxWidth="360">
+                    <Label text="🏨  About the Resort" styleClass="home-section-title"/>
+                    <Separator/>
+                    <Label text="Spread across 2 acres in the heart of Jodhpur, Zaffirana Resorts is a tribute to Rajasthan's royal heritage. Our 8 suites blend Rajput architecture with modern luxury — sandstone courtyards, hand-painted frescoes, and unobstructed views of Mehrangarh Fort." styleClass="home-card-body"/>
+                    <Label text="From rooftop dining under desert stars to Ayurvedic spa rituals, every moment here is crafted for royalty." styleClass="home-card-body"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <padding><Insets top="4"/></padding>
+                        <Label text="📍 Mehrangarh Estate, Jodhpur 342001" styleClass="home-stat-title"/>
+                    </HBox>
+                </VBox>
+            </HBox>
+
+        </VBox>
+    </content>
+</ScrollPane>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotel.controller.BillingController">
+
+    <top>
+        <HBox styleClass="panel-header" spacing="12" alignment="CENTER_LEFT">
+            <padding><Insets top="16" bottom="16" left="20" right="20"/></padding>
+            <Label text="Billing &amp; History" styleClass="panel-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="↻ Refresh" styleClass="btn-secondary" onAction="#loadBilling"/>
+        </HBox>
+    </top>
+
+    <center>
+        <SplitPane orientation="VERTICAL" dividerPositions="0.55">
+
+            <!-- All bookings table -->
+            <TableView fx:id="billingTable" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colBlId"       text="Booking ID" prefWidth="90"/>
+                    <TableColumn fx:id="colBlGuest"    text="Guest"      prefWidth="150"/>
+                    <TableColumn fx:id="colBlRoom"     text="Room"       prefWidth="80"/>
+                    <TableColumn fx:id="colBlIn"       text="Check-In"   prefWidth="110"/>
+                    <TableColumn fx:id="colBlOut"      text="Check-Out"  prefWidth="110"/>
+                    <TableColumn fx:id="colBlStatus"   text="Status"     prefWidth="110"/>
+                    <TableColumn fx:id="colBlAmount"   text="Total (₹)"  prefWidth="110"/>
+                </columns>
+            </TableView>
+
+            <!-- Bill summary panel -->
+            <VBox styleClass="bill-panel" spacing="12">
+                <padding><Insets top="20" bottom="20" left="30" right="30"/></padding>
+                <Label text="Bill Summary" styleClass="panel-title"/>
+                <Separator/>
+                <GridPane hgap="20" vgap="10">
+                    <Label text="Booking ID:"    GridPane.columnIndex="0" GridPane.rowIndex="0" styleClass="bill-label"/>
+                    <Label fx:id="lblBkId"       GridPane.columnIndex="1" GridPane.rowIndex="0" styleClass="bill-value"/>
+                    <Label text="Guest:"         GridPane.columnIndex="0" GridPane.rowIndex="1" styleClass="bill-label"/>
+                    <Label fx:id="lblBkGuest"    GridPane.columnIndex="1" GridPane.rowIndex="1" styleClass="bill-value"/>
+                    <Label text="Room:"          GridPane.columnIndex="0" GridPane.rowIndex="2" styleClass="bill-label"/>
+                    <Label fx:id="lblBkRoom"     GridPane.columnIndex="1" GridPane.rowIndex="2" styleClass="bill-value"/>
+                    <Label text="Check-In:"      GridPane.columnIndex="0" GridPane.rowIndex="3" styleClass="bill-label"/>
+                    <Label fx:id="lblBkIn"       GridPane.columnIndex="1" GridPane.rowIndex="3" styleClass="bill-value"/>
+                    <Label text="Check-Out:"     GridPane.columnIndex="0" GridPane.rowIndex="4" styleClass="bill-label"/>
+                    <Label fx:id="lblBkOut"      GridPane.columnIndex="1" GridPane.rowIndex="4" styleClass="bill-value"/>
+                    <Label text="Nights:"        GridPane.columnIndex="0" GridPane.rowIndex="5" styleClass="bill-label"/>
+                    <Label fx:id="lblNights"     GridPane.columnIndex="1" GridPane.rowIndex="5" styleClass="bill-value"/>
+                    <Label text="Rate/Night:"    GridPane.columnIndex="0" GridPane.rowIndex="6" styleClass="bill-label"/>
+                    <Label fx:id="lblRate"       GridPane.columnIndex="1" GridPane.rowIndex="6" styleClass="bill-value"/>
+                    <Label text="TOTAL AMOUNT:"  GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="bill-total-label"/>
+                    <Label fx:id="lblTotal"      GridPane.columnIndex="1" GridPane.rowIndex="7" styleClass="bill-total-value"/>
+                </GridPane>
+            </VBox>
+
+        </SplitPane>
+    </center>
+
+</BorderPane>

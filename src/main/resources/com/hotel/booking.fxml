@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotel.controller.BookingController">
+
+    <top>
+        <HBox styleClass="panel-header" spacing="12" alignment="CENTER_LEFT">
+            <padding><Insets top="16" bottom="16" left="20" right="20"/></padding>
+            <Label text="Bookings" styleClass="panel-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="＋ New Booking" styleClass="btn-primary" onAction="#openBookingDialog"/>
+            <Button text="✓ Checkout" styleClass="btn-danger" onAction="#checkoutSelected"/>
+            <Button text="↻ Refresh" styleClass="btn-secondary" onAction="#loadBookings"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="bookingTable" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="colBkId"       text="ID"         prefWidth="60"/>
+                <TableColumn fx:id="colBkGuest"    text="Guest"      prefWidth="150"/>
+                <TableColumn fx:id="colBkRoom"     text="Room"       prefWidth="80"/>
+                <TableColumn fx:id="colBkType"     text="Type"       prefWidth="100"/>
+                <TableColumn fx:id="colBkCheckIn"  text="Check-In"   prefWidth="120"/>
+                <TableColumn fx:id="colBkStatus"   text="Status"     prefWidth="110"/>
+                <TableColumn fx:id="colBkRate"     text="Rate/Night" prefWidth="110"/>
+            </columns>
+        </TableView>
+    </center>
+
+</BorderPane>

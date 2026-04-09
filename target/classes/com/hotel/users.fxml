@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotel.controller.UsersController">
+
+    <top>
+        <HBox styleClass="panel-header" spacing="12" alignment="CENTER_LEFT">
+            <padding><Insets top="16" bottom="16" left="20" right="20"/></padding>
+            <Label text="User Management" styleClass="panel-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="＋ Create User" styleClass="btn-primary" onAction="#openCreateUserDialog"/>
+            <Button text="↻ Refresh" styleClass="btn-secondary" onAction="#loadUsers"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TableView fx:id="usersTable" styleClass="data-table">
+            <columns>
+                <TableColumn fx:id="colUserId" text="ID" prefWidth="90"/>
+                <TableColumn fx:id="colEmail"  text="Email" prefWidth="220"/>
+                <TableColumn fx:id="colName"   text="Name" prefWidth="220"/>
+                <TableColumn fx:id="colRole"   text="Role" prefWidth="110"/>
+            </columns>
+        </TableView>
+    </center>
+
+</BorderPane>

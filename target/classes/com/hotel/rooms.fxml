@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.hotel.controller.RoomController">
+
+    <top>
+        <HBox styleClass="panel-header" spacing="12" alignment="CENTER_LEFT">
+            <padding><Insets top="16" bottom="16" left="20" right="20"/></padding>
+            <Label text="Room Management" styleClass="panel-title"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="＋ Add Room" styleClass="btn-primary" onAction="#openAddRoomDialog"/>
+            <Button text=" Delete Selected" styleClass="btn-danger" onAction="#deleteSelectedRoom"/>
+            <Button text=" Refresh" styleClass="btn-secondary" onAction="#loadRooms"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="0">
+            <TableView fx:id="roomTable" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colRoomId"     text="Room ID"   prefWidth="80"/>
+                    <TableColumn fx:id="colRoomNumber"  text="Number"    prefWidth="90"/>
+                    <TableColumn fx:id="colRoomType"    text="Type"      prefWidth="120"/>
+                    <TableColumn fx:id="colPrice"       text="Price/Night" prefWidth="130"/>
+                    <TableColumn fx:id="colStatus"      text="Status"    prefWidth="130"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox styleClass="panel-footer" spacing="16" alignment="CENTER_LEFT">
+            <padding><Insets top="10" bottom="10" left="20" right="20"/></padding>
+            <Label fx:id="roomCountLabel" text="Total Rooms: 0" styleClass="info-label"/>
+            <Label fx:id="availableLabel" text="Available: 0" styleClass="info-label-green"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>
