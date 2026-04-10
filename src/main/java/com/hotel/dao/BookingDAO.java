@@ -100,7 +100,8 @@ public class BookingDAO {
             ps.setDate(1, Date.valueOf(checkOut));
             ps.setDouble(2, total);
             ps.setInt(3, bookingId);
-            ps.executeUpdate();
+            int rowsUpdated = ps.executeUpdate();
+            System.out.println("DEBUG: Updated booking " + bookingId + ", rows affected: " + rowsUpdated);
         }
 
         // Get room_id and free the room
@@ -114,6 +115,26 @@ public class BookingDAO {
             }
         }
         return total;
+    }
+
+    public void clearAllBillingData() throws SQLException {
+        try (Connection c = DBConnection.getConnection()) {
+            // Delete in proper order due to foreign key constraints
+            // 1. Delete booking service items first
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM booking_service_items")) {
+                ps.executeUpdate();
+            }
+            
+            // 2. Delete bookings
+            try (PreparedStatement ps = c.prepareStatement("DELETE FROM bookings")) {
+                ps.executeUpdate();
+            }
+            
+            // 3. Reset room status to AVAILABLE for all rooms
+            try (PreparedStatement ps = c.prepareStatement("UPDATE rooms SET status = 'AVAILABLE'")) {
+                ps.executeUpdate();
+            }
+        }
     }
 
     public List<Booking> getActiveBookings() throws SQLException {
@@ -169,8 +190,10 @@ public class BookingDAO {
                 bk.setPricePerNight(rs.getDouble("price_per_night"));
                 bk.setGuestName(rs.getString("guest_name"));
                 list.add(bk);
+                System.out.println("DEBUG: Found booking " + bk.getBookingId() + ", status: " + bk.getStatus() + ", checkout: " + bk.getCheckOut());
             }
         }
+        System.out.println("DEBUG: Total bookings found: " + list.size());
         return list;
     }
 }

@@ -15,7 +15,9 @@ import javafx.scene.layout.VBox;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class UserPortalController {
@@ -48,12 +50,25 @@ public class UserPortalController {
 
         if (dpCheckIn != null) {
             dpCheckIn.valueProperty().addListener((obs, oldV, newV) -> {
+                // Ensure checkout is after check-in
+                if (dpCheckOut != null && dpCheckOut.getValue() != null && newV != null) {
+                    if (!dpCheckOut.getValue().isAfter(newV)) {
+                        dpCheckOut.setValue(newV.plusDays(1));
+                    }
+                }
                 refreshEligibleRoomTypes();
                 updateFinalPriceAndAvailability();
             });
         }
         if (dpCheckOut != null) {
             dpCheckOut.valueProperty().addListener((obs, oldV, newV) -> {
+                // Ensure checkout is after check-in
+                if (dpCheckIn != null && dpCheckIn.getValue() != null && newV != null) {
+                    if (!newV.isAfter(dpCheckIn.getValue())) {
+                        dpCheckOut.setValue(dpCheckIn.getValue().plusDays(1));
+                        return; // This will trigger the listener again with valid date
+                    }
+                }
                 refreshEligibleRoomTypes();
                 updateFinalPriceAndAvailability();
             });
@@ -69,7 +84,7 @@ public class UserPortalController {
             cbRoomType.setCellFactory(param -> new ListCell<Room>() {
                 @Override protected void updateItem(Room item, boolean empty) {
                     super.updateItem(item, empty);
-                    setText(empty ? "" : item.getRoomType() + " (¥" + String.format("%.0f", item.getPrice()) + "/night)");
+                    setText(empty ? "" : item.getRoomType() + " (Rs " + String.format("%.0f", item.getPrice()) + "/night)");
                 }
             });
             cbRoomType.setButtonCell(new ListCell<Room>() {
@@ -187,12 +202,14 @@ public class UserPortalController {
 
         try {
             List<Room> availableRooms = roomDAO.getAvailableRooms();
-            List<Room> eligible = new ArrayList<>();
+            // Keep only one room per type
+            Map<String, Room> onePerType = new LinkedHashMap<>();
             for (Room r : availableRooms) {
-                if (isRoomTypeEligible(r.getRoomType(), guests)) {
-                    eligible.add(r);
+                if (isRoomTypeEligible(r.getRoomType(), guests) && !onePerType.containsKey(r.getRoomType())) {
+                    onePerType.put(r.getRoomType(), r);
                 }
             }
+            List<Room> eligible = new ArrayList<>(onePerType.values());
 
             if (cbRoomType != null) {
                 cbRoomType.getItems().setAll(eligible);
@@ -260,7 +277,7 @@ public class UserPortalController {
         boolean available = cbRoomType.getItems().contains(selected);
 
         String status = available ? "Available" : "Unavailable";
-        String priceText = String.format("Final Price: %.2f | %s | %d night(s)", finalTotal, status, nights);
+        String priceText = String.format("Final Price: Rs %.2f | %s | %d night(s)", finalTotal, status, nights);
         if (!available) {
             priceText = "Room type not available for selected dates/guests";
         }
@@ -278,57 +295,175 @@ public class UserPortalController {
     private void openServicesDialog(int bookingId, LocalDate checkIn, LocalDate checkOut, int maxPax) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add Services");
-        dialog.setHeaderText("Add extra services (optional) — charges will be added to final bill");
+        dialog.setHeaderText("Add extra services (optional) â charges will be added to final bill");
+        dialog.setResizable(false);
+        dialog.setWidth(650);
+        dialog.setHeight(500);
 
-        ButtonType saveBtn = new ButtonType("Save Services", ButtonBar.ButtonData.OK_DONE);
+        ButtonType saveBtn = new ButtonType("Save Changes", ButtonBar.ButtonData.OK_DONE);
         ButtonType skipBtn = new ButtonType("Skip", ButtonBar.ButtonData.CANCEL_CLOSE);
         dialog.getDialogPane().getButtonTypes().addAll(saveBtn, skipBtn, ButtonType.CANCEL);
 
-        VBox root = new VBox(12);
-        root.setPadding(new Insets(14));
+        ScrollPane scroll = new ScrollPane();
+        scroll.setFitToWidth(true);
+        scroll.setPrefViewportWidth(600);
+        scroll.setPrefViewportHeight(400);
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(15));
+        scroll.setContent(root);
 
+        // Price info
         Label priceInfo = new Label(
-            "Food/Room Service: ₹400 per order\n" +
-            "Spa: ₹500 per person\n" +
-            "Pool: ₹50 per person per day\n" +
-            "Banquet Hall: ₹10000 flat\n" +
-            "Breakfast: Free for Deluxe/Suite, else ₹200 per person per night (if selected)");
+            "Room Service: Lunch Rs450/person, Dinner Rs400/person (by date)\n" +
+            "Normal Lunch: Rs350/person (by date)\n" +
+            "Normal Dinner: Rs300/person (by date)\n" +
+            "Spa: Rs500 per person\n" +
+            "Pool: Rs50 per person per day\n" +
+            "Banquet Hall: Rs10000 flat\n" +
+            "Breakfast: Free for Deluxe/Suite, else Rs200 per person per night (if selected)");
         priceInfo.getStyleClass().add("info-label");
 
-        CheckBox cbBanquet = new CheckBox("Banquet Hall (₹10000)");
+        // Room Service section (date-specific like pool)
+        TitledPane roomServicePane = new TitledPane("Room Service", new VBox(8));
+        ListView<String> rsLunchList = new ListView<>();
+        ListView<String> rsDinnerList = new ListView<>();
+        rsLunchList.setPrefHeight(80);
+        rsDinnerList.setPrefHeight(80);
 
-        Spinner<Integer> spFoodOrders = new Spinner<>(0, 20, 0);
-        spFoodOrders.setPrefWidth(120);
-        HBox foodRow = new HBox(10, new Label("Food/Room Service orders (₹400 each):"), spFoodOrders);
+        // Room Service Lunch controls
+        DatePicker dpRSLunchDate = new DatePicker(checkIn);
+        Spinner<Integer> spRSLunchPlates = new Spinner<>(1, Math.max(1, maxPax), 1);
+        spRSLunchPlates.setPrefWidth(80);
+        Button btnAddRSLunch = new Button("Add Room Service Lunch");
+        btnAddRSLunch.setOnAction(evt -> {
+            LocalDate day = dpRSLunchDate.getValue();
+            Integer plates = spRSLunchPlates.getValue();
+            if (day == null) return;
+            if (checkIn != null && checkOut != null && (day.isBefore(checkIn) || !day.isBefore(checkOut))) {
+                showAlert("Validation", "Date must be within the stay period.", Alert.AlertType.WARNING);
+                return;
+            }
+            rsLunchList.getItems().add(day + " | plates: " + plates);
+        });
 
+        // Room Service Dinner controls
+        DatePicker dpRSDinnerDate = new DatePicker(checkIn);
+        Spinner<Integer> spRSDinnerPlates = new Spinner<>(1, Math.max(1, maxPax), 1);
+        spRSDinnerPlates.setPrefWidth(80);
+        Button btnAddRSDinner = new Button("Add Room Service Dinner");
+        btnAddRSDinner.setOnAction(evt -> {
+            LocalDate day = dpRSDinnerDate.getValue();
+            Integer plates = spRSDinnerPlates.getValue();
+            if (day == null) return;
+            if (checkIn != null && checkOut != null && (day.isBefore(checkIn) || !day.isBefore(checkOut))) {
+                showAlert("Validation", "Date must be within the stay period.", Alert.AlertType.WARNING);
+                return;
+            }
+            rsDinnerList.getItems().add(day + " | plates: " + plates);
+        });
+
+        GridPane rsGrid = new GridPane();
+        rsGrid.setHgap(10); rsGrid.setVgap(8);
+        rsGrid.add(new Label("Lunch date:"), 0, 0);
+        rsGrid.add(dpRSLunchDate, 1, 0);
+        rsGrid.add(new Label("Plates:"), 2, 0);
+        rsGrid.add(spRSLunchPlates, 3, 0);
+        rsGrid.add(btnAddRSLunch, 4, 0);
+        rsGrid.add(new Label("Added lunches:"), 0, 1);
+        rsGrid.add(rsLunchList, 1, 1, 4, 1);
+        rsGrid.add(new Label("Dinner date:"), 0, 2);
+        rsGrid.add(dpRSDinnerDate, 1, 2);
+        rsGrid.add(new Label("Plates:"), 2, 2);
+        rsGrid.add(spRSDinnerPlates, 3, 2);
+        rsGrid.add(btnAddRSDinner, 4, 2);
+        rsGrid.add(new Label("Added dinners:"), 0, 3);
+        rsGrid.add(rsDinnerList, 1, 3, 4, 1);
+        roomServicePane.setContent(rsGrid);
+
+        // Normal Lunch/Dinner by date
+        TitledPane mealsPane = new TitledPane("Normal Meals (by date)", new VBox(8));
+        ListView<String> lunchList = new ListView<>();
+        ListView<String> dinnerList = new ListView<>();
+        lunchList.setPrefHeight(80);
+        dinnerList.setPrefHeight(80);
+
+        // Lunch controls
+        DatePicker dpLunchDate = new DatePicker(checkIn);
+        Spinner<Integer> spLunchPlates = new Spinner<>(1, Math.max(1, maxPax), 1);
+        spLunchPlates.setPrefWidth(80);
+        Button btnAddLunch = new Button("Add Lunch");
+        btnAddLunch.setOnAction(evt -> {
+            LocalDate day = dpLunchDate.getValue();
+            Integer plates = spLunchPlates.getValue();
+            if (day == null) return;
+            if (checkIn != null && checkOut != null && (day.isBefore(checkIn) || !day.isBefore(checkOut))) {
+                showAlert("Validation", "Date must be within the stay period.", Alert.AlertType.WARNING);
+                return;
+            }
+            lunchList.getItems().add(day + " | plates: " + plates);
+        });
+
+        // Dinner controls
+        DatePicker dpDinnerDate = new DatePicker(checkIn);
+        Spinner<Integer> spDinnerPlates = new Spinner<>(1, Math.max(1, maxPax), 1);
+        spDinnerPlates.setPrefWidth(80);
+        Button btnAddDinner = new Button("Add Dinner");
+        btnAddDinner.setOnAction(evt -> {
+            LocalDate day = dpDinnerDate.getValue();
+            Integer plates = spDinnerPlates.getValue();
+            if (day == null) return;
+            if (checkIn != null && checkOut != null && (day.isBefore(checkIn) || !day.isBefore(checkOut))) {
+                showAlert("Validation", "Date must be within the stay period.", Alert.AlertType.WARNING);
+                return;
+            }
+            dinnerList.getItems().add(day + " | plates: " + plates);
+        });
+
+        GridPane mealsGrid = new GridPane();
+        mealsGrid.setHgap(10); mealsGrid.setVgap(8);
+        mealsGrid.add(new Label("Lunch date:"), 0, 0);
+        mealsGrid.add(dpLunchDate, 1, 0);
+        mealsGrid.add(new Label("Plates:"), 2, 0);
+        mealsGrid.add(spLunchPlates, 3, 0);
+        mealsGrid.add(btnAddLunch, 4, 0);
+        mealsGrid.add(new Label("Added lunches:"), 0, 1);
+        mealsGrid.add(lunchList, 1, 1, 4, 1);
+        mealsGrid.add(new Label("Dinner date:"), 0, 2);
+        mealsGrid.add(dpDinnerDate, 1, 2);
+        mealsGrid.add(new Label("Plates:"), 2, 2);
+        mealsGrid.add(spDinnerPlates, 3, 2);
+        mealsGrid.add(btnAddDinner, 4, 2);
+        mealsGrid.add(new Label("Added dinners:"), 0, 3);
+        mealsGrid.add(dinnerList, 1, 3, 4, 1);
+        mealsPane.setContent(mealsGrid);
+
+        // Spa, Pool, Banquet
+        TitledPane otherPane = new TitledPane("Other Services", new VBox(8));
         Spinner<Integer> spSpaPax = new Spinner<>(0, Math.max(0, maxPax), 0);
-        spSpaPax.setPrefWidth(120);
-        HBox spaRow = new HBox(10, new Label("Spa pax (₹500 per person):"), spSpaPax);
+        spSpaPax.setPrefWidth(100);
+        HBox spaRow = new HBox(10, new Label("Spa pax (Rs500 per person):"), spSpaPax);
+
+        CheckBox cbBanquet = new CheckBox("Banquet Hall (Rs10000)");
 
         ListView<String> poolList = new ListView<>();
-        poolList.setPrefHeight(110);
-
+        poolList.setPrefHeight(80);
         DatePicker dpPoolDay = new DatePicker(checkIn);
         Spinner<Integer> spPoolPax = new Spinner<>(1, Math.max(1, maxPax), 1);
-        spPoolPax.setPrefWidth(90);
+        spPoolPax.setPrefWidth(80);
         Button btnAddPoolDay = new Button("Add Pool Day");
-
         btnAddPoolDay.setOnAction(evt -> {
             LocalDate day = dpPoolDay.getValue();
             Integer pax = spPoolPax.getValue();
             if (day == null) return;
-            if (checkIn != null && checkOut != null) {
-                if (day.isBefore(checkIn) || !day.isBefore(checkOut)) {
-                    showAlert("Validation", "Pool day must be within the stay period.", Alert.AlertType.WARNING);
-                    return;
-                }
+            if (checkIn != null && checkOut != null && (day.isBefore(checkIn) || !day.isBefore(checkOut))) {
+                showAlert("Validation", "Pool day must be within the stay period.", Alert.AlertType.WARNING);
+                return;
             }
             poolList.getItems().add(day + " | pax: " + pax);
         });
 
         GridPane poolGrid = new GridPane();
-        poolGrid.setHgap(10);
-        poolGrid.setVgap(10);
+        poolGrid.setHgap(10); poolGrid.setVgap(8);
         poolGrid.add(new Label("Pool day:"), 0, 0);
         poolGrid.add(dpPoolDay, 1, 0);
         poolGrid.add(new Label("Pax:"), 2, 0);
@@ -337,8 +472,10 @@ public class UserPortalController {
         poolGrid.add(new Label("Added pool entries:"), 0, 1);
         poolGrid.add(poolList, 1, 1, 4, 1);
 
-        root.getChildren().addAll(priceInfo, cbBanquet, foodRow, spaRow, new Separator(), poolGrid);
-        dialog.getDialogPane().setContent(root);
+        otherPane.setContent(new VBox(8, spaRow, cbBanquet, poolGrid));
+
+        root.getChildren().addAll(priceInfo, roomServicePane, mealsPane, otherPane);
+        dialog.getDialogPane().setContent(scroll);
 
         dialog.getDialogPane().getStylesheets().add(getClass().getResource("/com/hotel/styles.css").toExternalForm());
 
@@ -349,31 +486,66 @@ public class UserPortalController {
         try {
             ServiceDAO serviceDAO = new ServiceDAO();
 
-            if (spFoodOrders.getValue() != null && spFoodOrders.getValue() > 0) {
-                double price = serviceDAO.getUnitPrice("FOOD");
-                serviceDAO.addServiceItem(bookingId, "FOOD", null, null, spFoodOrders.getValue(), price);
+            // Room Service Lunch by date
+            for (String entry : rsLunchList.getItems()) {
+                String[] parts = entry.split("\\|plates:");
+                if (parts.length != 2) continue;
+                LocalDate day = LocalDate.parse(parts[0].trim());
+                int plates = Integer.parseInt(parts[1].trim());
+                double price = serviceDAO.getUnitPrice("ROOM_SERVICE_LUNCH");
+                serviceDAO.addServiceItem(bookingId, "ROOM_SERVICE_LUNCH", day, plates, plates, price);
             }
 
+            // Room Service Dinner by date
+            for (String entry : rsDinnerList.getItems()) {
+                String[] parts = entry.split("\\|plates:");
+                if (parts.length != 2) continue;
+                LocalDate day = LocalDate.parse(parts[0].trim());
+                int plates = Integer.parseInt(parts[1].trim());
+                double price = serviceDAO.getUnitPrice("ROOM_SERVICE_DINNER");
+                serviceDAO.addServiceItem(bookingId, "ROOM_SERVICE_DINNER", day, plates, plates, price);
+            }
+
+            // Normal Lunch by date
+            for (String entry : lunchList.getItems()) {
+                String[] parts = entry.split("\\|plates:");
+                if (parts.length != 2) continue;
+                LocalDate day = LocalDate.parse(parts[0].trim());
+                int plates = Integer.parseInt(parts[1].trim());
+                double price = serviceDAO.getUnitPrice("LUNCH");
+                serviceDAO.addServiceItem(bookingId, "LUNCH", day, plates, plates, price);
+            }
+
+            // Normal Dinner by date
+            for (String entry : dinnerList.getItems()) {
+                String[] parts = entry.split("\\|plates:");
+                if (parts.length != 2) continue;
+                LocalDate day = LocalDate.parse(parts[0].trim());
+                int plates = Integer.parseInt(parts[1].trim());
+                double price = serviceDAO.getUnitPrice("DINNER");
+                serviceDAO.addServiceItem(bookingId, "DINNER", day, plates, plates, price);
+            }
+
+            // Spa
             if (spSpaPax.getValue() != null && spSpaPax.getValue() > 0) {
                 double price = serviceDAO.getUnitPrice("SPA");
                 serviceDAO.addServiceItem(bookingId, "SPA", null, spSpaPax.getValue(), spSpaPax.getValue(), price);
             }
 
+            // Banquet
             if (cbBanquet.isSelected()) {
                 double price = serviceDAO.getUnitPrice("BANQUET");
                 serviceDAO.addServiceItem(bookingId, "BANQUET", null, null, 1, price);
             }
 
-            if (!poolList.getItems().isEmpty()) {
+            // Pool
+            for (String entry : poolList.getItems()) {
+                String[] parts = entry.split("\\|pax:");
+                if (parts.length != 2) continue;
+                LocalDate day = LocalDate.parse(parts[0].trim());
+                int pax = Integer.parseInt(parts[1].trim());
                 double price = serviceDAO.getUnitPrice("POOL");
-                for (String entry : poolList.getItems()) {
-                    // format: yyyy-mm-dd | pax: N
-                    String[] parts = entry.split("\\|pax:");
-                    if (parts.length != 2) continue;
-                    LocalDate day = LocalDate.parse(parts[0].trim());
-                    int pax = Integer.parseInt(parts[1].trim());
-                    serviceDAO.addServiceItem(bookingId, "POOL", day, pax, pax, price);
-                }
+                serviceDAO.addServiceItem(bookingId, "POOL", day, pax, pax, price);
             }
 
             showAlert("Saved", "Services saved. They will be added to the final bill at checkout.", Alert.AlertType.INFORMATION);

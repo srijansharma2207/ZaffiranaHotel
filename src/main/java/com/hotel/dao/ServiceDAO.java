@@ -80,4 +80,67 @@ public class ServiceDAO {
         }
         return 0;
     }
+
+    public Map<String, Double> getBookingServiceBreakdown(int bookingId) throws SQLException {
+        Map<String, Double> breakdown = new LinkedHashMap<>();
+
+        String breakfastSql =
+            "SELECT b.check_in, b.check_out, b.guests_count, b.breakfast_included, r.room_type " +
+            "FROM bookings b " +
+            "JOIN rooms r ON b.room_id = r.room_id " +
+            "WHERE b.booking_id = ?";
+
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(breakfastSql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Date checkOutDate   = rs.getDate("check_out");
+                    LocalDate checkIn   = rs.getDate("check_in").toLocalDate();
+                    LocalDate checkOut  = checkOutDate != null ? checkOutDate.toLocalDate() : null;
+                    int guests          = rs.getInt("guests_count");
+                    boolean breakfast   = "Y".equalsIgnoreCase(rs.getString("breakfast_included"));
+                    String roomType     = rs.getString("room_type");
+
+                    if (breakfast && checkOut != null) {
+                        long nights = java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut);
+                        if (nights < 1) nights = 1;
+                        String rt = roomType != null ? roomType.trim().toUpperCase() : "";
+                        boolean free = rt.contains("DELUXE") || rt.contains("SUITE");
+                        if (!free) {
+                            double breakfastCost = 200.0 * guests * nights;
+                            breakdown.put("Breakfast (" + guests + " guests × " + nights + " nights)", breakfastCost);
+                        } else {
+                            breakdown.put("Breakfast (included free)", 0.0);
+                        }
+                    } else if (breakfast && checkOut == null) {
+                        breakdown.put("Breakfast (will be calculated at checkout)", 0.0);
+                    }
+                }
+            }
+        }
+
+        // ✅ FIXED: use service_name instead of description
+        String serviceSql =
+            "SELECT bsi.service_code, bsi.quantity, bsi.amount, sc.service_name " +
+            "FROM booking_service_items bsi " +
+            "JOIN service_catalog sc ON bsi.service_code = sc.service_code " +
+            "WHERE bsi.booking_id = ? " +
+            "ORDER BY bsi.service_code";
+
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(serviceSql)) {
+            ps.setInt(1, bookingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    String serviceName = rs.getString("service_name");
+                    int quantity       = rs.getInt("quantity");
+                    double amount      = rs.getDouble("amount");
+                    breakdown.put(serviceName + " (" + quantity + "×)", amount);
+                }
+            }
+        }
+
+        return breakdown;
+    }
 }

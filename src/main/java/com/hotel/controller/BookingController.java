@@ -92,21 +92,19 @@ public class BookingController {
             grid.setHgap(15); grid.setVgap(12);
             grid.setPadding(new Insets(20));
 
-            // Guest fields
             TextField tfName    = styledField("Full name");
             TextField tfPhone   = styledField("Phone number");
             TextField tfEmail   = styledField("Email address");
             TextField tfIdProof = styledField("Aadhar/Passport No.");
+
             ComboBox<String> cbGender = new ComboBox<>(FXCollections.observableArrayList("Male", "Female", "Other"));
             cbGender.getStyleClass().add("dialog-form-field");
             cbGender.setPromptText("Select gender");
 
-            // Room selection
             ComboBox<Room> cbRoom = new ComboBox<>(FXCollections.observableArrayList(availableRooms));
             cbRoom.getStyleClass().add("dialog-form-field");
             cbRoom.setPromptText("Select a room");
 
-            // Check-in date
             DatePicker dpCheckIn = new DatePicker(LocalDate.now());
 
             grid.add(label("Guest Name:"),  0, 0); grid.add(tfName,    1, 0);
@@ -127,6 +125,10 @@ public class BookingController {
                     showAlert("Validation", "Name and Room are required.", Alert.AlertType.WARNING);
                     return;
                 }
+                if (cbGender.getValue() == null || cbGender.getValue().isBlank()) {
+                    showAlert("Validation", "Gender is required.", Alert.AlertType.WARNING);
+                    return;
+                }
 
                 Guest guest = new Guest();
                 guest.setName(tfName.getText().trim());
@@ -135,11 +137,6 @@ public class BookingController {
                 guest.setIdProof(tfIdProof.getText().trim());
                 guest.setGender(cbGender.getValue());
 
-                if (guest.getGender() == null || guest.getGender().isBlank()) {
-                    showAlert("Validation", "Gender is required.", Alert.AlertType.WARNING);
-                    return;
-                }
-
                 int guestId = guestDAO.addGuest(guest);
                 Room selectedRoom = cbRoom.getValue();
                 int bookingId = bookingDAO.createBooking(
@@ -147,7 +144,8 @@ public class BookingController {
                 roomDAO.updateRoomStatus(selectedRoom.getRoomId(), "OCCUPIED");
 
                 loadBookings();
-                showAlert("Booked!", "Booking #" + bookingId + " created for " + guest.getName(), Alert.AlertType.INFORMATION);
+                showAlert("Booked!", "Booking #" + bookingId + " created for " + guest.getName(),
+                    Alert.AlertType.INFORMATION);
             }
 
         } catch (SQLException e) {
@@ -159,41 +157,77 @@ public class BookingController {
     public void checkoutSelected() {
         Booking selected = bookingTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
-            showAlert("Select Booking", "Please select a booking to checkout.", Alert.AlertType.WARNING);
+            showAlert("Select Booking", "Please click on a booking row first, then click Checkout.",
+                Alert.AlertType.WARNING);
             return;
         }
 
-        Dialog<LocalDate> dialog = new Dialog<>();
-        dialog.setTitle("Checkout");
-        dialog.setHeaderText("Checkout: " + selected.getGuestName() + " | Room " + selected.getRoomNumber());
+        LocalDate checkIn = selected.getCheckIn();
 
-        ButtonType checkoutBtn = new ButtonType("Checkout", ButtonBar.ButtonData.OK_DONE);
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Checkout Guest");
+        dialog.setHeaderText("Checking out: " + selected.getGuestName() + " | Room " + selected.getRoomNumber());
+
+        ButtonType checkoutBtn = new ButtonType("Confirm Checkout", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(checkoutBtn, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
-        grid.setHgap(15); grid.setVgap(12);
+        grid.setHgap(15);
+        grid.setVgap(12);
         grid.setPadding(new Insets(20));
-        DatePicker dpCheckOut = new DatePicker(LocalDate.now());
-        grid.add(label("Check-Out Date:"), 0, 0);
-        grid.add(dpCheckOut, 1, 0);
+
+        // Opens calendar at check-in date — admin picks any date on or after it
+        DatePicker dpCheckout = new DatePicker(checkIn);
+
+        Label infoLabel = new Label("Select any date on or after check-in: " + checkIn);
+        infoLabel.setStyle("-fx-text-fill: #666; -fx-font-style: italic; -fx-font-size: 11px;");
+
+        grid.add(label("Checkout Date:"), 0, 0);
+        grid.add(dpCheckout, 1, 0);
+        grid.add(infoLabel, 0, 1, 2, 1);
+
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getStylesheets().add(
             getClass().getResource("/com/hotel/styles.css").toExternalForm());
 
-        dialog.setResultConverter(btn -> btn == checkoutBtn ? dpCheckOut.getValue() : null);
+        while (true) {
+            Optional<ButtonType> result = dialog.showAndWait();
 
-        Optional<LocalDate> result = dialog.showAndWait();
-        result.ifPresent(checkOut -> {
+            // Admin cancelled
+            if (result.isEmpty() || result.get() != checkoutBtn) return;
+
+            LocalDate checkoutDate = dpCheckout.getValue();
+
+            if (checkoutDate == null) {
+                showAlert("No Date Selected", "Please pick a checkout date from the calendar.",
+                    Alert.AlertType.WARNING);
+                continue;
+            }
+
+            // Only rule: checkout cannot be before check-in
+            if (checkoutDate.isBefore(checkIn)) {
+                showAlert("Invalid Date",
+                    "Checkout date cannot be before check-in date (" + checkIn + ").\nPlease select a valid date.",
+                    Alert.AlertType.WARNING);
+                continue;
+            }
+
+            // All good — process checkout
             try {
-                double total = bookingDAO.checkoutBooking(selected.getBookingId(), checkOut);
-                loadBookings();
+                double total = bookingDAO.checkoutBooking(selected.getBookingId(), checkoutDate);
+                loadBookings(); // removed from Bookings tab, now appears in Billing tab
                 showAlert("Checkout Complete",
-                    "Guest checked out.\nTotal Bill: ₹" + String.format("%.2f", total),
+                    "Guest:      " + selected.getGuestName() + "\n" +
+                    "Room:       " + selected.getRoomNumber() + "\n" +
+                    "Check-in:   " + checkIn + "\n" +
+                    "Check-out:  " + checkoutDate + "\n\n" +
+                    "Total Bill: \u20b9" + String.format("%.2f", total),
                     Alert.AlertType.INFORMATION);
             } catch (SQLException e) {
                 showAlert("DB Error", e.getMessage(), Alert.AlertType.ERROR);
             }
-        });
+            return;
+        }
     }
 
     private TextField styledField(String prompt) {

@@ -182,14 +182,17 @@ EXCEPTION
 END;
 /
 
-PROMPT Seeding service catalog (prices you specified)
+PROMPT Seeding service catalog with separate services (prices you specified)
 MERGE INTO service_catalog sc
 USING (
-  SELECT 'FOOD'    AS service_code, 'Lunch/Dinner/Room Service' AS service_name, 400 AS unit_price, 'PER_ORDER'        AS pricing_model FROM dual UNION ALL
-  SELECT 'SPA'     AS service_code, 'Spa'                       AS service_name, 500 AS unit_price, 'PER_PERSON'       AS pricing_model FROM dual UNION ALL
-  SELECT 'POOL'    AS service_code, 'Pool Access'               AS service_name,  50 AS unit_price, 'PER_PERSON_PER_DAY' AS pricing_model FROM dual UNION ALL
-  SELECT 'BANQUET' AS service_code, 'Banquet Hall'              AS service_name,10000 AS unit_price, 'FLAT'             AS pricing_model FROM dual UNION ALL
-  SELECT 'BREAKFAST' AS service_code, 'Breakfast'               AS service_name, 200 AS unit_price, 'PER_PERSON_PER_NIGHT' AS pricing_model FROM dual
+  SELECT 'ROOM_SERVICE_LUNCH' AS service_code, 'Room Service - Lunch'      AS service_name, 450 AS unit_price, 'PER_PERSON'       AS pricing_model FROM dual UNION ALL
+  SELECT 'ROOM_SERVICE_DINNER' AS service_code, 'Room Service - Dinner'     AS service_name, 400 AS unit_price, 'PER_PERSON'       AS pricing_model FROM dual UNION ALL
+  SELECT 'LUNCH'               AS service_code, 'Lunch (Normal)'            AS service_name, 350 AS unit_price, 'PER_PERSON'       AS pricing_model FROM dual UNION ALL
+  SELECT 'DINNER'              AS service_code, 'Dinner (Normal)'           AS service_name, 300 AS unit_price, 'PER_PERSON'       AS pricing_model FROM dual UNION ALL
+  SELECT 'SPA'                 AS service_code, 'Spa'                       AS service_name, 500 AS unit_price, 'PER_PERSON'       AS pricing_model FROM dual UNION ALL
+  SELECT 'POOL'                AS service_code, 'Pool Access'               AS service_name,  50 AS unit_price, 'PER_PERSON_PER_DAY' AS pricing_model FROM dual UNION ALL
+  SELECT 'BANQUET'             AS service_code, 'Banquet Hall'              AS service_name,10000 AS unit_price, 'FLAT'             AS pricing_model FROM dual UNION ALL
+  SELECT 'BREAKFAST'           AS service_code, 'Breakfast'                  AS service_name, 200 AS unit_price, 'PER_PERSON_PER_NIGHT' AS pricing_model FROM dual
 ) src
 ON (sc.service_code = src.service_code)
 WHEN MATCHED THEN

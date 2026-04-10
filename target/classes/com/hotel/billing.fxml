@@ -11,6 +11,7 @@
             <padding><Insets top="16" bottom="16" left="20" right="20"/></padding>
             <Label text="Billing &amp; History" styleClass="panel-title"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Clear History" styleClass="btn-danger" onAction="#clearBillingHistory"/>
             <Button text="↻ Refresh" styleClass="btn-secondary" onAction="#loadBilling"/>
         </HBox>
     </top>
@@ -53,6 +54,11 @@
                     <Label fx:id="lblRate"       GridPane.columnIndex="1" GridPane.rowIndex="6" styleClass="bill-value"/>
                     <Label text="TOTAL AMOUNT:"  GridPane.columnIndex="0" GridPane.rowIndex="7" styleClass="bill-total-label"/>
                     <Label fx:id="lblTotal"      GridPane.columnIndex="1" GridPane.rowIndex="7" styleClass="bill-total-value"/>
+                    
+                    <!-- Additional Cost Breakdown -->
+                    <Separator GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2"/>
+                    <Label text="Additional Costs:" GridPane.columnIndex="0" GridPane.rowIndex="9" styleClass="bill-label"/>
+                    <VBox fx:id="vbAdditionalCosts" spacing="4" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="10"/>
                 </GridPane>
             </VBox>
 

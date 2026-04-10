@@ -9,6 +9,7 @@ com\hotel\controller\UserPortalController$2.class
 com\hotel\model\Booking.class
 com\hotel\controller\BillingController$1.class
 com\hotel\controller\MainController.class
+com\hotel\controller\UsersController$1.class
 com\hotel\model\Guest.class
 com\hotel\dao\AppUserDAO.class
 com\hotel\controller\BookingController.class
@@ -20,5 +21,6 @@ com\hotel\session\Session.class
 com\hotel\security\PasswordUtil.class
 com\hotel\controller\UserPortalController.class
 com\hotel\dao\BookingDAO.class
+com\hotel\controller\BillingController$2.class
 com\hotel\controller\RoomController.class
 com\hotel\controller\BillingController.class

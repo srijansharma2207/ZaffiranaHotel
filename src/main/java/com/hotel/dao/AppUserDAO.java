@@ -121,4 +121,44 @@ public class AppUserDAO {
         }
         return list;
     }
+
+    public void deleteUser(int userId) throws SQLException {
+        // Prevent deleting the last admin
+        if (isLastAdmin(userId)) {
+            throw new SQLException("Cannot delete the last admin user");
+        }
+
+        String sql = "DELETE FROM app_users WHERE user_id = ?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("User not found with ID: " + userId);
+            }
+        }
+    }
+
+    private boolean isLastAdmin(int userId) throws SQLException {
+        // Check if this user is admin
+        String checkSql = "SELECT role FROM app_users WHERE user_id = ?";
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(checkSql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next() || !"ADMIN".equals(rs.getString("role"))) {
+                    return false; // Not an admin, so not the last admin
+                }
+            }
+        }
+
+        // Count remaining admins
+        String countSql = "SELECT COUNT(*) FROM app_users WHERE role = 'ADMIN'";
+        try (Connection c = DBConnection.getConnection();
+             Statement st = c.createStatement();
+             ResultSet rs = st.executeQuery(countSql)) {
+            rs.next();
+            return rs.getInt(1) <= 1; // 1 or 0 admins means this is the last one
+        }
+    }
 }

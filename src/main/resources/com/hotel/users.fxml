@@ -12,6 +12,7 @@
             <Label text="User Management" styleClass="panel-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="＋ Create User" styleClass="btn-primary" onAction="#openCreateUserDialog"/>
+            <Button text="Delete User" styleClass="btn-danger" onAction="#deleteSelectedUser"/>
             <Button text="↻ Refresh" styleClass="btn-secondary" onAction="#loadUsers"/>
         </HBox>
     </top>
@@ -23,6 +24,7 @@
                 <TableColumn fx:id="colEmail"  text="Email" prefWidth="220"/>
                 <TableColumn fx:id="colName"   text="Name" prefWidth="220"/>
                 <TableColumn fx:id="colRole"   text="Role" prefWidth="110"/>
+                <TableColumn fx:id="colDelete" text="Delete" prefWidth="80"/>
             </columns>
         </TableView>
     </center>

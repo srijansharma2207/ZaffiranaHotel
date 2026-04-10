@@ -23,6 +23,7 @@ public class UsersController {
     @FXML private TableColumn<AppUser, String> colEmail;
     @FXML private TableColumn<AppUser, String> colName;
     @FXML private TableColumn<AppUser, String> colRole;
+    @FXML private TableColumn<AppUser, Void> colDelete;
 
     private final AppUserDAO appUserDAO = new AppUserDAO();
     private final GuestDAO guestDAO = new GuestDAO();
@@ -33,6 +34,28 @@ public class UsersController {
         colEmail.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getEmail()));
         colName.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getFullName()));
         colRole.setCellValueFactory(d -> new SimpleStringProperty(d.getValue().getRole()));
+
+        // Delete column with delete button
+        colDelete.setCellFactory(param -> new TableCell<>() {
+            private final Button deleteButton = new Button("Delete");
+            {
+                deleteButton.setStyle("-fx-background-color: #d32f2f; -fx-text-fill: white; -fx-font-size: 11px; -fx-padding: 2 8 2 8;");
+                deleteButton.setOnAction(event -> {
+                    AppUser user = getTableView().getItems().get(getIndex());
+                    confirmDelete(user);
+                });
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(deleteButton);
+                }
+            }
+        });
+
         loadUsers();
     }
 
@@ -120,6 +143,34 @@ public class UsersController {
             showAlert("Created", "User account created.", Alert.AlertType.INFORMATION);
         } catch (SQLException e) {
             showAlert("DB Error", e.getMessage(), Alert.AlertType.ERROR);
+        }
+    }
+
+    @FXML
+    public void deleteSelectedUser() {
+        AppUser selected = usersTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            showAlert("Select User", "Please select a user to delete.", Alert.AlertType.WARNING);
+            return;
+        }
+        confirmDelete(selected);
+    }
+
+    private void confirmDelete(AppUser user) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirm Delete");
+        confirm.setHeaderText("Delete User: " + user.getFullName());
+        confirm.setContentText("Are you sure you want to delete this user?\n\nEmail: " + user.getEmail() + "\nRole: " + user.getRole() + "\n\nThis action cannot be undone.");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                appUserDAO.deleteUser(user.getUserId());
+                loadUsers();
+                showAlert("Deleted", "User deleted successfully.", Alert.AlertType.INFORMATION);
+            } catch (SQLException e) {
+                showAlert("Delete Error", e.getMessage(), Alert.AlertType.ERROR);
+            }
         }
     }
 
